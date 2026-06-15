@@ -94,7 +94,7 @@ Plisthead *
 order_download(Plisthead *impacthead)
 {
 	Plisthead	*dlhead;
-	Pkglist		*p, *last = NULL, **dlpkgs;
+	Pkglist		*p, **dlpkgs;
 	size_t		i, count = 0;
 
 	dlhead = init_head();
@@ -123,13 +123,9 @@ order_download(Plisthead *impacthead)
 
 	qsort(dlpkgs, count, sizeof(*dlpkgs), sort_pkglist_alpha);
 
-	for (i = 0; i < count; i++) {
-		if (last == NULL)
-			SLIST_INSERT_HEAD(dlhead, dlpkgs[i], next);
-		else
-			SLIST_INSERT_AFTER(last, dlpkgs[i], next);
-		last = dlpkgs[i];
-	}
+	/* SLIST only prepends; insert in reverse to end up sorted. */
+	while (count > 0)
+		SLIST_INSERT_HEAD(dlhead, dlpkgs[--count], next);
 
 	free(dlpkgs);
 
